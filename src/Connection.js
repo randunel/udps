@@ -123,11 +123,13 @@ export default class Connection extends EventEmitter {
     this._decryptPkt(pkt)
     this.stream._packet(pkt)
   }
-  close (cb) {
+  close () {
     if (!this.ready) return
-    this._send(Packet.createFinalize(), () => {
-      this.emit('close')
-      if (typeof cb === 'function') cb()
-    })
+    return new Promise((resolve) => {
+        this._send(Packet.createFinalize(), () => {
+            this.emit('close')
+            resolve()
+        })
+    });
   }
 }
