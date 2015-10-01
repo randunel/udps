@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 
-import async from 'async'
 import { keys, values } from 'lodash'
 import PacketSocket from './PacketSocket'
 import Connection from './Connection'
@@ -49,11 +48,13 @@ export default class Server extends EventEmitter {
     })
   }
   close () {
-    async.each(values(this._connections), (con, cb) => {
-      con.close(cb)
-    }, () => {
-      this._connections = {}
-      this._ps.close()
+      Promise.all(values(this._connections).map(
+          (connection) => Promise.resolve().then(
+              () => connection.close()
+          )
+      )).then(() => {
+          this._connections = {}
+          this._ps.close()
     })
   }
 }
